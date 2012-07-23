@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="DroidAudio" default="build" basedir=".">
+
+  <target name="build">
+    <ant antfile="build.xml" dir="Src\DroidAudio" />
+    <ant antfile="build.xml" dir="Src\libdroidaudio" />
+    <copy file="Src\DroidAudio\dist\DroidAudio.jar" todir="Bin" />
+    <copy todir="Bin">
+      <fileset dir="Src\libdroidaudio\libs">
+        <include name="**\*.so" />
+      </fileset>
+    </copy>
+  </target>
+
+</project>

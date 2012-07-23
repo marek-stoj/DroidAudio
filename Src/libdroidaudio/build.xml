@@ -1,0 +1,16 @@
+<project name="libdroidaudio" basedir="." default="build">
+
+	<property name="nkd_build.path" value="C:\Programs\android-ndk-windows\ndk-build.cmd" />
+
+	<target name="clean">
+		<exec executable="${nkd_build.path}" failonerror="true">
+			<arg value="clean" />
+		</exec>
+	</target>
+
+	<target name="build">
+		<echo>ndk_build path: ${nkd_build.path}</echo>
+		<exec executable="${nkd_build.path}" failonerror="true" />
+	</target>
+
+</project>
