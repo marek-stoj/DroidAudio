@@ -11,7 +11,6 @@ struct Mp3File {
   mpg123_handle* handle;
   int channels;
   long rate;
-  float length;
   size_t buffer_size;
   unsigned char* buffer;
   int leftSamples;
@@ -40,58 +39,48 @@ static inline int readBuffer(Mp3File* mp3) {
 }
 
 static inline jlong wrapped_Java_com_marekstoj_droidaudio_Mpg123Decoder_openFile(JNIEnv* env, jobject object, jstring obj_filename, char* filename) {
-    mpg123_handle *mh = NULL;
-    int  channels = 0, encoding = 0;
-    long rate = 0;
-    int  err  = MPG123_OK;
+  mpg123_handle *mh = NULL;
+  int  channels = 0, encoding = 0;
+  long rate = 0;
+  int  err  = MPG123_OK;
 
-    err = mpg123_init();
+  err = mpg123_init();
 
-    if (err != MPG123_OK || (mh = mpg123_new(NULL, &err)) == NULL
-     || mpg123_open(mh, filename) != MPG123_OK
-     || mpg123_getformat(mh, &rate, &channels, &encoding) != MPG123_OK) {
-      fprintf( stderr, "Trouble with mpg123: %s\n", mh == NULL ? mpg123_plain_strerror(err) : mpg123_strerror(mh));
-      cleanup(mh);
+  if (err != MPG123_OK || (mh = mpg123_new(NULL, &err)) == NULL
+   || mpg123_open(mh, filename) != MPG123_OK
+   || mpg123_getformat(mh, &rate, &channels, &encoding) != MPG123_OK) {
+    fprintf( stderr, "Trouble with mpg123: %s\n", mh == NULL ? mpg123_plain_strerror(err) : mpg123_strerror(mh));
+    cleanup(mh);
 
-      return 0;
-    }
+    return 0;
+  }
 
-    if (encoding != MPG123_ENC_SIGNED_16) { 
-      // Signed 16 is the default output format anyways; it would actually by only different if we forced it.
-      // So this check is here just for this explanation.
-      cleanup(mh);
+  if (encoding != MPG123_ENC_SIGNED_16) { 
+    // Signed 16 is the default output format anyways; it would actually by only different if we forced it.
+    // So this check is here just for this explanation.
+    cleanup(mh);
 
-      return 0;
-    }
+    return 0;
+  }
 
-    // Ensure that this output format will not change (it could, when we allow it).
-    mpg123_format_none(mh);
-    mpg123_format(mh, rate, channels, encoding);
+  // Ensure that this output format will not change (it could, when we allow it).
+  mpg123_format_none(mh);
+  mpg123_format(mh, rate, channels, encoding);
 
-    size_t buffer_size = mpg123_outblock(mh);
-    unsigned char* buffer = (unsigned char*)malloc(buffer_size);
-    size_t done = 0;
-    int samples = 0;
+  size_t buffer_size = mpg123_outblock(mh);
+  unsigned char* buffer = (unsigned char*)malloc(buffer_size);
+  size_t done = 0;
+  int samples = 0;
 
-    Mp3File* mp3 = new Mp3File();
+  Mp3File* mp3 = new Mp3File();
 
-    mp3->handle = mh;
-    mp3->channels = channels;
-    mp3->rate = rate;
-    mp3->buffer = buffer;
-    mp3->buffer_size = buffer_size;
+  mp3->handle = mh;
+  mp3->channels = channels;
+  mp3->rate = rate;
+  mp3->buffer = buffer;
+  mp3->buffer_size = buffer_size;
 
-    int length = mpg123_length(mh);
-
-    if (length == MPG123_ERR) {
-      mp3->length = 0;
-    }
-    else {
-      mp3->length = length / rate;
-    }
-
-    return (jlong)mp3;
-
+  return (jlong)mp3;
 }
 
 JNIEXPORT jlong JNICALL Java_com_marekstoj_droidaudio_Mpg123Decoder_openFile(JNIEnv* env, jobject object, jstring obj_filename) {
@@ -179,12 +168,6 @@ JNIEXPORT jint JNICALL Java_com_marekstoj_droidaudio_Mpg123Decoder_getRate(JNIEn
   Mp3File* mp3 = (Mp3File*)handle;
 
   return mp3->rate;
-}
-
-JNIEXPORT jfloat JNICALL Java_com_marekstoj_droidaudio_Mpg123Decoder_getLength(JNIEnv* env, jobject object, jlong handle) {
-  Mp3File* mp3 = (Mp3File*)handle;
-
-  return mp3->length;
 }
 
 JNIEXPORT void JNICALL Java_com_marekstoj_droidaudio_Mpg123Decoder_closeFile(JNIEnv* env, jobject object, jlong handle) {

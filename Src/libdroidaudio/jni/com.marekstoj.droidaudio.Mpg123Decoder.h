@@ -23,9 +23,6 @@ JNIEXPORT jint JNICALL Java_com_marekstoj_droidaudio_Mpg123Decoder_getNumChannel
 JNIEXPORT jint JNICALL Java_com_marekstoj_droidaudio_Mpg123Decoder_getRate
   (JNIEnv *, jobject, jlong);
 
-JNIEXPORT jfloat JNICALL Java_com_marekstoj_droidaudio_Mpg123Decoder_getLength
-  (JNIEnv *, jobject, jlong);
-
 JNIEXPORT void JNICALL Java_com_marekstoj_droidaudio_Mpg123Decoder_closeFile
   (JNIEnv *, jobject, jlong);
 

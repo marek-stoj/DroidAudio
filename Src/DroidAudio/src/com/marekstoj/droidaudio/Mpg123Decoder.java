@@ -18,6 +18,8 @@ package com.marekstoj.droidaudio;
 import java.io.File;
 
 /**
+ * Wrapper for libmpg123 (see: http://www.mpg123.de/api/).
+ * 
  * @author badlogicgames@gmail.com
  * @author marek.stoj@gmail.com
  */
@@ -37,38 +39,33 @@ public class Mpg123Decoder extends Decoder {
     _handle = openFile(file.getAbsolutePath());
 	}
 
+  @Override
+	public int getChannelsCount() {
+		return getNumChannels(_handle);
+	}
+
+  @Override
+	public int getRate() {
+		return getRate(_handle);
+	}
+
+  @Override
+  public long getSamplesCount() {
+    return length(_handle);
+  }
+  
 	@Override
-	public int readSamples (short[] samples, int offset, int numSamples) {
+	public int readSamples(short[] samples, int offset, int numSamples) {
 		int readSamplesCount = readSamples(_handle, samples, offset, numSamples);
     
 		return readSamplesCount;
 	}
 
 	@Override
-	public int skipSamples (int numSamples) {
+	public int skipSamples(int numSamples) {
 		return skipSamples(_handle, numSamples);
 	}
 
-  @Override
-	public int getChannels () {
-		return getNumChannels(_handle);
-	}
-
-  @Override
-	public int getRate () {
-		return getRate(_handle);
-	}
-
-  @Override
-	public float getLength () {
-		return getLength(_handle);
-	}
-	
-  @Override
-  public long getSamplesCount() {
-    return length(_handle);
-  }
-  
   @Override
   public long getCurrentSample() {
     return tell(_handle);
@@ -80,7 +77,7 @@ public class Mpg123Decoder extends Decoder {
   }
   
 	@Override
-	public void dispose () {
+	public void dispose() {
 		closeFile(_handle);
   }
 
@@ -94,12 +91,10 @@ public class Mpg123Decoder extends Decoder {
 
 	private native int getRate(long handle);
 
-	private native float getLength(long handle);
-
 	private native void closeFile(long handle);
 
   private native long length(long handle);
-  
+ 
   private native long tell(long handle);
   
 	private native long seek(long handle, long offset);

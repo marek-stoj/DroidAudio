@@ -24,24 +24,11 @@ package com.marekstoj.droidaudio;
  */
 public abstract class Decoder implements Disposable {
 
-  /** 
-   * Reads in samples.capacity() samples in 16-bit signed PCM format from the decoder.
-   * Returns the actual number read in. If this number is smaller than the capacity
-   * of the buffer then the end of stream has been reached. The provided ShortBuffer
-   * must be a direct buffer.
-   * 
-   * @param samples The number of samples to read. 
-   * @param offset the offset at which to start writting samples to
-   * 
-   * @return the number of samples read, < numSamples means end of file
-   */
-  public abstract int readSamples(short[] samples, int offset, int numSamples);
-
   /**
    * Reads in the entire sound file into a single short[] array.
    */
   public short[] readAllSamples() {
-    short[] out = new short[(int) Math.ceil(getLength() * getRate() * getChannels())];
+    short[] out = new short[(int) Math.ceil(getLengthInSeconds() * getRate() * getChannelsCount())];
     short[] buffer = new short[1024 * 5];
     int readSamples = 0;
     int totalSamples = 0;
@@ -60,40 +47,59 @@ public abstract class Decoder implements Disposable {
 
     if (out.length != totalSamples) {
       short[] tmp = new short[totalSamples];
+      
       System.arraycopy(out, 0, tmp, 0, totalSamples);
       out = tmp;
     }
 
     return out;
   }
-
-  /**
-   * Skips numSamples samples.
-   * If the decoded file is in stereo the left and right channel samples are counted as 2 samples.
-   * 
-   * @param numSamples the number of samples to skip
-   * 
-   * @return the number of samples actually skipped. If this is < numSamples then the end of the file has been reached.
-   */
-  public abstract int skipSamples(int numSamples);
-
+  
+  public float getLengthInSeconds() {
+    int rate = getRate();
+    
+    if (rate == 0) {
+      return 0;
+    }
+    
+    return (float)getSamplesCount() / rate;
+  }
+  
   /**
    * @return the number of channels
    */
-  public abstract int getChannels();
+  public abstract int getChannelsCount();
 
   /**
    * @return the sampling rate in herz, e.g. 44100
    */
   public abstract int getRate();
 
-  /**
-   * @return the length of the file in seconds
-   */
-  public abstract float getLength();
-
   public abstract long getSamplesCount();
 
+  /** 
+   * Reads in samples.capacity() samples in 16-bit signed PCM format from the decoder.
+   * Returns the actual number read in. If this number is smaller than the capacity
+   * of the buffer then the end of stream has been reached. The provided ShortBuffer
+   * must be a direct buffer.
+   * 
+   * @param samples The number of samples to read. 
+   * @param offset the offset at which to start writting samples to
+   * 
+   * @return the number of samples read, < numSamples means end of file
+   */
+  public abstract int readSamples(short[] samples, int offset, int samplesCount);
+
+  /**
+   * Skips numSamples samples.
+   * If the decoded file is in stereo the left and right channel samples are counted as 2 samples.
+   * 
+   * @param samplesCount the number of samples to skip
+   * 
+   * @return the number of samples actually skipped. If this is < numSamples then the end of the file has been reached.
+   */
+  public abstract int skipSamples(int samplesCount);
+  
   public abstract long getCurrentSample();
 
   public abstract long seekToSample(long sample);
