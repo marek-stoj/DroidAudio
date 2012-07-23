@@ -24,7 +24,7 @@ import java.io.File;
 public class Mpg123Decoder extends Decoder {
   
 	static {
-    System.loadLibrary("libdroidaudio");
+    System.loadLibrary("droidaudio");
 	}
 	
 	private final long _handle;
